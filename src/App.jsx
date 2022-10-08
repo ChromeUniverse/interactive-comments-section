@@ -1,16 +1,25 @@
-import React, { useState } from 'react'
+// packages
+import React, { useState, useEffect } from 'react'
+import { nanoid } from 'nanoid';
+
+// Components
 import Modal from './components/Modal';
 import Comment from './components/Comment'
 import TextInput from './components/TextInput';
 
+// API functions
+import deleteCommentAPI from './api/deleteComment';
+import addCommentAPI from './api/addComment';
+import editCommentAPI from './api/editComment';
+import addReplyAPI from './api/addReplyAPI';
+
 // data
 import data from './data.json'
-import { nanoid } from 'nanoid';
 
 function App() {
 
   const [user, setUser] = useState(data.currentUser);
-  const [comments, setComments] = useState(data.comments);
+  const [comments, setComments] = useState(JSON.parse(localStorage.getItem('comments')) || data.comments);
   const [showModal, setShowModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
   const [newCommentContent, setNewCommentContent] = useState('');
@@ -23,7 +32,10 @@ function App() {
     setComments(oldComments => {
 
       // search base comments first
-      if (oldComments.map(c => c.id).includes(id)) return oldComments.filter(c => c.id !== id);
+      if (oldComments.map(c => c.id).includes(id)) {
+        const newComments = oldComments.filter(c => c.id !== id);
+        return newComments;
+      }
 
       // deep search - replies
       for (const baseComment of oldComments) {
@@ -81,6 +93,7 @@ function App() {
 
   }
 
+  // Adds reply to parent comment
   function addReply(parentId, originalPoster, content) {
 
     console.log(parentId, originalPoster);
@@ -103,10 +116,12 @@ function App() {
     );    
   }
 
+  // New Comment text input change handler
   function newCommentChangeHandler(e) {
     setNewCommentContent(e.target.value);
   }
 
+  // Adds new top-level comment
   function addNewComment(content) {
     const newComment = {
       "id": nanoid(),
@@ -119,6 +134,12 @@ function App() {
     setComments(oldComments => [...oldComments, newComment]);
     setNewCommentContent('');
   }
+
+  // sync changes with localStorage
+  useEffect(() => {
+    localStorage.setItem('comments', JSON.stringify(comments));
+  }, [comments])
+  
 
   return (
     <div className="bg-veryLightGray min-h-screen relative">
@@ -133,7 +154,7 @@ function App() {
       )}
 
       {/* Main container */}
-      <div className="w-[720px] mx-auto flex flex-col py-6 gap-6">
+      <div className="w-[90%] md:w-[720px] mx-auto flex flex-col py-6 gap-6">
         {/* Comments */}
         {comments.map((comment) => {
           return (
