@@ -26,7 +26,7 @@ function Modal({ setShowModal, setCommentToDelete, deleteComment }) {
       {/* Modal Card */}
       <div
         ref={modalCard}
-        className="bg-white rounded-lg p-8 w-[400px] flex flex-col gap-4"
+        className="bg-white rounded-lg p-8 w-[90vw] md:w-[400px] flex flex-col gap-4"
       >
         <h2 className="text-2xl font-semibold text-darkBlue">Delete comment</h2>
         <p className="text-grayishBlue">

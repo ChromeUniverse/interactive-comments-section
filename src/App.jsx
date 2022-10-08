@@ -173,10 +173,10 @@ function App() {
               {comment.replies.length !== 0 && (
                 <div className="relative mt-4">
                   {/* Vertical bar */}
-                  <div className="absolute w-[2px] bg-grayishBlue/10 left-10 top-0 bottom-2"></div>
+                  <div className="absolute w-[2px] bg-grayishBlue/10 left-0 md:left-10 top-0 bottom-2"></div>
 
                   {/* Replies */}
-                  <div className='ml-20 flex flex-col items-end gap-6'>
+                  <div className='ml-4 md:ml-20 flex flex-col items-end gap-6'>
                     {comment.replies.map((reply) => (
                       <Comment
                         key={reply.id}
