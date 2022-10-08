@@ -103,6 +103,7 @@ function App() {
       content: content,
       createdAt: "just now",
       score: 1,
+      rating: 1,
       user: user,
       "replyingTo": originalPoster,
     };
@@ -128,11 +129,70 @@ function App() {
       "content": content,
       "createdAt": "just now",
       "score": 1,
+      "rating": 1,
       "user": user,
       "replies": []
     }
     setComments(oldComments => [...oldComments, newComment]);
     setNewCommentContent('');
+  }
+
+  // returns new comment with updated ratings
+  function newRating(comment, button) {
+    let newScore = 0;
+    let newRating = 0;
+
+    if (button === "+") {
+      newRating = 1
+      if (comment.rating === -1) newScore = comment.score + 2;
+      if (comment.rating ===  0) newScore = comment.score + 1;
+      if (comment.rating ===  1) {
+        newScore = comment.score - 1;
+        newRating = 0;
+      };
+    }
+
+    if (button === "-") {
+      newRating = -1;
+      if (comment.rating === -1) {
+        newScore = comment.score + 1;
+        newRating = 0;
+      };
+      if (comment.rating === 0) newScore = comment.score - 1;
+      if (comment.rating === 1) newScore = comment.score - 2;
+    }
+
+    return { ...comment, score: newScore, rating: newRating };
+  }
+
+  // sets the rating for a comment
+  function rateComment(id, button) {
+    setComments(oldComments => {
+
+      // search base comments first
+      if (oldComments.map(c => c.id).includes(id)) {
+        return oldComments.map((c) => c.id === id ? newRating(c, button) : c);
+      }      
+
+      // deep search - replies
+      for (const baseComment of oldComments) {
+        for (const reply of baseComment.replies) {
+          if (reply.id === id) {
+            return oldComments.map((oldBaseComment) =>
+              oldBaseComment.id === baseComment.id
+                ? {
+                    ...oldBaseComment,
+                    replies: oldBaseComment.replies.map((r) =>
+                      r.id === id ? newRating(r, button) : r
+                    ),
+                  }
+                : oldBaseComment
+            );
+          }
+        }
+      }  
+
+    })
   }
 
   // sync changes with localStorage
@@ -167,6 +227,7 @@ function App() {
                 setCommentToDelete={setCommentToDelete}
                 editComment={editComment}
                 addReply={addReply}
+                rateComment={rateComment}
               />
 
               {/* replies container */}
@@ -187,6 +248,7 @@ function App() {
                         editComment={editComment}
                         addReply={addReply}
                         parentId={comment.id}
+                        rateComment={rateComment}
                         reply
                       />
                     ))}

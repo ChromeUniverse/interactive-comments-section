@@ -13,7 +13,8 @@
   - [x] ~~Text input~~
   - [x] ~~Reply button~~
 - [x] ~~Nested components~~
-- [ ] Delete Modal
+- [x] ~~Delete Modal~~
+- [x] ~~Mobile design~~
 
 ## State 💾
 
@@ -21,5 +22,9 @@
 - [x] ~~Edit comment~~
 - [x] ~~Add reply~~
 - [x] ~~Add comment~~
+- [x] ~~Rating system~~
+- [x] ~~localStorage functionality~~
 
 ## Going Fullstack 🚀
+
+- [ ] ...
