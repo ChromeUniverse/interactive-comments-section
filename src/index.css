@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @layer components {
+  .icon-hover {
+    @apply hover:brightness-0 hover:saturate-0 hover:invert-[34%] hover:sepia-[43%] hover:saturate-[983%] hover:hue-rotate-[203deg] hover:brightness-[87%] hover:contrast-[79%]
+  }
+} */
+
+/* width */
+::-webkit-scrollbar {
+  @apply mr-2 w-2 -left-5;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply bg-opacity-0;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply bg-moderateBlue/50 rounded-full;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-moderateBlue;
+}
+
+.icon-hover:hover {
+  filter: brightness(0) saturate(100%) invert(34%) sepia(43%) saturate(983%) hue-rotate(203deg) brightness(87%) contrast(79%);
+}
