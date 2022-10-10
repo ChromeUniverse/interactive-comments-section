@@ -1,8 +1,11 @@
 // packages
 import React, { useState, useEffect } from 'react'
 import { nanoid } from 'nanoid';
+import jwt_decode from "jwt-decode";
+
 
 // Components
+import Header from './components/Header';
 import Modal from './components/Modal';
 import Comment from './components/Comment'
 import TextInput from './components/TextInput';
@@ -11,110 +14,37 @@ import TextInput from './components/TextInput';
 import deleteCommentAPI from './api/deleteComment';
 import addCommentAPI from './api/addComment';
 import editCommentAPI from './api/editComment';
-import addReplyAPI from './api/addReplyAPI';
+import rateCommentAPI from './api/rateComment';
 
 // data
 import data from './data.json'
+import fetchRatingsAPI from './api/fetchRatings';
+
 
 function App() {
-
-  const [user, setUser] = useState(data.currentUser);
-  const [comments, setComments] = useState(JSON.parse(localStorage.getItem('comments')) || data.comments);
+  const [user, setUser] = useState({});
+  const [comments, setComments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
   const [newCommentContent, setNewCommentContent] = useState('');
 
   // Removes comment/reply from "comments" state
-  function deleteComment() {
-
+  async function deleteComment() {    
     const id = commentToDelete;
-
-    setComments(oldComments => {
-
-      // search base comments first
-      if (oldComments.map(c => c.id).includes(id)) {
-        const newComments = oldComments.filter(c => c.id !== id);
-        return newComments;
-      }
-
-      // deep search - replies
-      for (const baseComment of oldComments) {
-        for (const reply of baseComment.replies) {
-          if (reply.id === id) {
-
-            console.log(`Found in reply id ${reply.id} of base comment id ${baseComment.id}`);
-
-            return oldComments.map((oldBaseComment) =>
-              oldBaseComment.id === baseComment.id
-                ? {
-                    ...oldBaseComment,
-                    replies: oldBaseComment.replies.filter((r) => r.id !== id),
-                  }
-                : oldBaseComment
-            );
-          }
-        }
-      }  
-
-    })      
+    await deleteCommentAPI(id);
+    setComments(oldComments => oldComments.filter(c => c.comment_id !== id));      
   }
 
   // Edits comment
-  function editComment(id, newContent) {
+  async function editComment(id, newContent) {
 
-    setComments(oldComments => {
-
-      // search base comments first1
-      if (oldComments.map(c => c.id).includes(id)) {
-        return oldComments.map((c) =>
-          c.id === id ? { ...c, content: newContent } : c
-        );
-      }      
-
-      // deep search - replies
-      for (const baseComment of oldComments) {
-        for (const reply of baseComment.replies) {
-          if (reply.id === id) {
-            return oldComments.map((oldBaseComment) =>
-              oldBaseComment.id === baseComment.id
-                ? {
-                    ...oldBaseComment,
-                    replies: oldBaseComment.replies.map((r) =>
-                      r.id === id ? {...r, content: newContent} : r
-                    ),
-                  }
-                : oldBaseComment
-            );
-          }
-        }
-      }  
-
-    })   
-
-  }
-
-  // Adds reply to parent comment
-  function addReply(parentId, originalPoster, content) {
-
-    console.log(parentId, originalPoster);
-
-    const newReplyComment = {
-      id: nanoid(),
-      content: content,
-      createdAt: "just now",
-      score: 1,
-      rating: 1,
-      user: user,
-      "replyingTo": originalPoster,
-    };
+    await editCommentAPI(id, newContent);
 
     setComments((oldComments) =>
-      comments.map((c) =>
-        c.id === parentId
-          ? { ...c, replies: [...c.replies, newReplyComment] }
-          : c
+      oldComments.map((c) =>
+        c.comment_id === id ? { ...c, content: newContent } : c
       )
-    );    
+    );   
   }
 
   // New Comment text input change handler
@@ -123,86 +53,113 @@ function App() {
   }
 
   // Adds new top-level comment
-  function addNewComment(content) {
-    const newComment = {
-      "id": nanoid(),
-      "content": content,
-      "createdAt": "just now",
-      "score": 1,
-      "rating": 1,
-      "user": user,
-      "replies": []
-    }
-    setComments(oldComments => [...oldComments, newComment]);
-    setNewCommentContent('');
-  }
+  async function addNewComment(parentId = null, replyingTo = null, content) {    
 
-  // returns new comment with updated ratings
-  function newRating(comment, button) {
-    let newScore = 0;
-    let newRating = 0;
+    console.log('got here', parentId, content);
 
-    if (button === "+") {
-      newRating = 1
-      if (comment.rating === -1) newScore = comment.score + 2;
-      if (comment.rating ===  0) newScore = comment.score + 1;
-      if (comment.rating ===  1) {
-        newScore = comment.score - 1;
-        newRating = 0;
-      };
-    }
+    if (content === '') return;
 
-    if (button === "-") {
-      newRating = -1;
-      if (comment.rating === -1) {
-        newScore = comment.score + 1;
-        newRating = 0;
-      };
-      if (comment.rating === 0) newScore = comment.score - 1;
-      if (comment.rating === 1) newScore = comment.score - 2;
-    }
+    const newComment = await addCommentAPI(user, parentId, replyingTo, content);
+    console.log(newComment);
 
-    return { ...comment, score: newScore, rating: newRating };
+    setComments(oldComments =>  [...oldComments, newComment]);
+    if (parentId === null) setNewCommentContent('');
   }
 
   // sets the rating for a comment
-  function rateComment(id, button) {
-    setComments(oldComments => {
+  async function rateComment(id, button) {
 
-      // search base comments first
-      if (oldComments.map(c => c.id).includes(id)) {
-        return oldComments.map((c) => c.id === id ? newRating(c, button) : c);
-      }      
+    if (!loggedIn()) return; 
 
-      // deep search - replies
-      for (const baseComment of oldComments) {
-        for (const reply of baseComment.replies) {
-          if (reply.id === id) {
-            return oldComments.map((oldBaseComment) =>
-              oldBaseComment.id === baseComment.id
-                ? {
-                    ...oldBaseComment,
-                    replies: oldBaseComment.replies.map((r) =>
-                      r.id === id ? newRating(r, button) : r
-                    ),
-                  }
-                : oldBaseComment
-            );
-          }
-        }
-      }  
-
-    })
+    const newScore = await rateCommentAPI(id, button);
+    setComments((oldComments) =>
+      oldComments.map((c) =>
+        c.comment_id === id
+          ? { ...c, score: newScore, rating: c.rating === button ? 0 : button }
+          : c
+      )
+    );
   }
 
-  // sync changes with localStorage
+  function loggedIn() {    
+    return Object.keys(user).length !== 0 ? user : false;
+  }
+
+  // Run on page load
   useEffect(() => {
-    localStorage.setItem('comments', JSON.stringify(comments));
-  }, [comments])
+    
+    async function fetchAllComments() {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/comments`);
+      const data = await res.json();      
+      setComments(data.comments);
+    }
+    fetchAllComments();
+    
+    async function fetchUser() {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (!res.ok) return;
+      const user = await res.json();
+      fetchRatingsAPI(setComments);
+      setUser(user)
+      console.log(data);
+    }
+    fetchUser();
+
+  }, [])
+
+  // login callback
+  async function handleCallbackResponse(response) {
+    // decode token
+    const token = jwt_decode(response.credential);
+
+    // post it to server, retrive user token
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
+      method: "POST", 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(token),
+    })
+    const userToken = await res.text();    
+
+    // update app state
+    setUser(jwt_decode(userToken));    
+    localStorage.setItem('token', userToken);
+
+    fetchRatingsAPI(setComments);
+  }
+
+  // Google Auth
+  useEffect(() => {
+
+    const timer = setTimeout(() => {
+
+      console.log(`Here goes nothin'`);
+
+      /* global google */
+      google.accounts.id.initialize({
+        client_id: "994169675178-u8tbg94a4midpvv5j0loi83vm843mjr2.apps.googleusercontent.com",
+        callback: handleCallbackResponse
+      })
+
+      google.accounts.id.renderButton(document.getElementById("signInDiv"), {
+        theme: "outline",
+        size: "large",
+      });
+    }, 500);
+    
+    return () => {
+      clearTimeout(timer);
+    }
+
+  }, [])
+  
   
 
   return (
-    <div className="bg-veryLightGray min-h-screen relative">
+    <div className="bg-veryLightGray min-h-screen relative">      
 
       {/* Modal */}
       {showModal && (
@@ -214,53 +171,66 @@ function App() {
       )}
 
       {/* Main container */}
-      <div className="w-[90%] md:w-[720px] mx-auto flex flex-col py-6 gap-6">
+      <div className="w-[90%] md:w-[720px] mx-auto flex flex-col pt-6 pb-12 gap-6">
+
+        <Header/>
+
         {/* Comments */}
-        {comments.map((comment) => {
-          return (
-            <div className="flex flex-col" key={comment.id}>
+        {comments
+          .filter((c) => c.parent_id === null)
+          .map((comment) => (
+            <div className="flex flex-col" key={comment.comment_id}>
               {/* Base comment */}
               <Comment
+                key={comment.comment_id}
                 comment={comment}
-                user={user}
+                user={loggedIn()}
                 setShowModal={setShowModal}
                 setCommentToDelete={setCommentToDelete}
                 editComment={editComment}
-                addReply={addReply}
+                addReply={addNewComment}
                 rateComment={rateComment}
               />
 
               {/* replies container */}
-              {comment.replies.length !== 0 && (
+              {comments.filter((c) => c.parent_id === comment.comment_id)
+                .length !== 0 && (
                 <div className="relative mt-4">
                   {/* Vertical bar */}
                   <div className="absolute w-[2px] bg-grayishBlue/10 left-0 md:left-10 top-0 bottom-2"></div>
 
                   {/* Replies */}
-                  <div className='ml-4 md:ml-20 flex flex-col items-end gap-6'>
-                    {comment.replies.map((reply) => (
-                      <Comment
-                        key={reply.id}
-                        comment={reply}
-                        user={user}
-                        setShowModal={setShowModal}
-                        setCommentToDelete={setCommentToDelete}
-                        editComment={editComment}
-                        addReply={addReply}
-                        parentId={comment.id}
-                        rateComment={rateComment}
-                        reply
-                      />
-                    ))}
+                  <div className="ml-4 md:ml-20 flex flex-col items-end gap-6">
+                    {comments
+                      .filter((c) => c.parent_id === comment.comment_id)
+                      .map((reply) => (
+                        <Comment
+                          key={reply.comment_id}
+                          comment={reply}
+                          user={loggedIn()}
+                          setShowModal={setShowModal}
+                          setCommentToDelete={setCommentToDelete}
+                          editComment={editComment}
+                          addReply={addNewComment}
+                          parentId={comment.comment_id}
+                          rateComment={rateComment}
+                          replyingTo={comment.username}
+                          reply
+                        />
+                      ))}
                   </div>
                 </div>
               )}
             </div>
-          );
-        })}
+          ))}
 
         {/* Text Input */}
-        <TextInput user={data.currentUser} value={newCommentContent} onChange={newCommentChangeHandler} sendClickHandler={addNewComment} />
+        <TextInput
+          user={loggedIn()}
+          value={newCommentContent}
+          onChange={newCommentChangeHandler}
+          sendClickHandler={() => addNewComment(null, null, newCommentContent)}
+        />
       </div>
     </div>
   );
