@@ -9,6 +9,7 @@ import Header from './components/Header';
 import Modal from './components/Modal';
 import Comment from './components/Comment'
 import TextInput from './components/TextInput';
+import Footer from './components/Footer';
 
 // API functions
 import deleteCommentAPI from './api/deleteComment';
@@ -231,6 +232,8 @@ function App() {
           onChange={newCommentChangeHandler}
           sendClickHandler={() => addNewComment(null, null, newCommentContent)}
         />
+
+        <Footer />
       </div>
     </div>
   );

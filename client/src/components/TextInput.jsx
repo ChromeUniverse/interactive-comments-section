@@ -18,7 +18,7 @@ function TextInput({ user, reply = false, onChange, value, sendClickHandler, rep
         <>
           <img
             className="hidden md:inline-block w-9 rounded-full"
-            src={user ? user.pfp_url : blank_pfp_url}
+            src={user ? `${import.meta.env.VITE_BACKEND_URL}/avatars/${user.user_id}.jpg` : blank_pfp_url}
             alt=""
           />
           <textarea
@@ -62,7 +62,7 @@ function TextInput({ user, reply = false, onChange, value, sendClickHandler, rep
           <div className="flex md:hidden flex-row items-center w-full justify-between">
             <img
               className="inline-block md:hidden w-9 rounded-full"
-              src={user ? user.pfp_url : blank_pfp_url}
+              src={user ? `${import.meta.env.VITE_BACKEND_URL}/avatars/${user.user_id}.jpg` : blank_pfp_url}
               alt=""
             />
 

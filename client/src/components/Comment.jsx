@@ -161,7 +161,7 @@ function Comment({
             {/* PFP */}
             <img
               className="w-8 rounded-full"
-              src={comment.pfp_url}
+              src={`${import.meta.env.VITE_BACKEND_URL}/avatars/${comment.user_id}.jpg`}
               alt="user-pfp"
             />
 
