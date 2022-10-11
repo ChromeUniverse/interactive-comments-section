@@ -118,7 +118,7 @@ function App() {
     const token = jwt_decode(response.credential);
 
     // post it to server, retrive user token
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`, {
       method: "POST", 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(token),
