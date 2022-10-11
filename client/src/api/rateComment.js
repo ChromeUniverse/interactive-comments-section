@@ -1,5 +1,5 @@
 export default async function rateCommentAPI(id, button) {
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/rate/${id}`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/rate/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

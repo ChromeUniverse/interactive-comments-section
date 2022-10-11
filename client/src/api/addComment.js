@@ -1,6 +1,6 @@
 export default async function addCommentAPI(user, parentId, replyingTo, content) {
 
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/comments`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/comments`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

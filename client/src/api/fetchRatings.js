@@ -1,6 +1,6 @@
 export default async function fetchRatingsAPI(setComments) {
   // fetch all comment ratings for this user
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/rate`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/rate`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },

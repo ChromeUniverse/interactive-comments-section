@@ -90,14 +90,14 @@ function App() {
   useEffect(() => {
     
     async function fetchAllComments() {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/comments`);
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/comments`);
       const data = await res.json();      
       setComments(data.comments);
     }
     fetchAllComments();
     
     async function fetchUser() {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user`, {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

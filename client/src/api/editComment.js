@@ -1,5 +1,5 @@
 export default async function editCommentAPI(id, content) {
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/comments/${id}`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/comments/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

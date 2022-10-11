@@ -73,27 +73,27 @@ async function isLoggedIn(req, res, next) {
 
 // express config
 const app = express();
+const router = express.Router();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use('/avatars', express.static(path.join(__dirname, 'avatars')))
 
-
-app.get("/", (req, res) => {
+router.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-// Log into app or register new acoount
-app.post('/login', async (req, res) => {
+// Log into router or register new acoount
+router.post('/login', async (req, res) => {
   console.log(req.body);
 
   // {
   //   iss: 'https://accounts.google.com',
   //   nbf: 1665334797,
-  //   aud: '994169675178-u8tbg94a4midpvv5j0loi83vm843mjr2.apps.googleusercontent.com',
+  //   aud: '994169675178-u8tbg94a4midpvv5j0loi83vm843mjr2.routers.googleusercontent.com',
   //   sub: '103615500697380649858',
   //   email: 'omnichrome2@gmail.com',
   //   email_verified: true,
-  //   azp: '994169675178-u8tbg94a4midpvv5j0loi83vm843mjr2.apps.googleusercontent.com',
+  //   azp: '994169675178-u8tbg94a4midpvv5j0loi83vm843mjr2.routers.googleusercontent.com',
   //   name: 'Lucca Rodrigues',
   //   picture: 'https://lh3.googleusercontent.com/a/ALm5wu3JS9---a37fJq1ZM5G4XUF3FUGqMQDoyqZPWexpA=s96-c',
   //   given_name: 'Lucca',
@@ -132,19 +132,19 @@ app.post('/login', async (req, res) => {
 })
 
 // Fetch currently logged in user
-app.get('/user', isLoggedIn, (req, res) => {
+router.get('/user', isLoggedIn, (req, res) => {
   if (!req.user) return res.sendStatus(401);
   res.json(req.user);
 })
 
 // Fetch all users
-app.get('/users', (req, res) => {
+router.get('/users', (req, res) => {
   const users = db.prepare('SELECT * FROM users').all();
   res.json({users: users});
 })
 
 // Fetch all comments
-app.get('/comments', (req, res) => {    
+router.get('/comments', (req, res) => {    
   const comments = db.prepare('SELECT comments.id as comment_id, comments.content, comments.created_at, comments.parent_id, comments.replying_to, users.username, users.pfp_url, users.id as user_id FROM comments LEFT JOIN users ON comments.user_id = users.id').all();    
 
   const full_comments = comments.map(comment => {
@@ -155,13 +155,13 @@ app.get('/comments', (req, res) => {
 })
 
 // Fetch a single comment by ID
-app.get('/comments/:id', (req, res) => {
+router.get('/comments/:id', (req, res) => {
   const comment = db.prepare('SELECT comments.id as comment_id, comments.content, comments.created_at, comments.parent_id, users.username, users.pfp_url, users.id as user_id FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.id = ?').get(req.params.id);  
   res.json({comment: comment});
 })
 
 // Create a new comment
-app.post('/comments', isLoggedIn, (req, res) => {
+router.post('/comments', isLoggedIn, (req, res) => {
   if (!req.user) return res.sendStatus(401);
   
   // add new comment to DB
@@ -174,7 +174,7 @@ app.post('/comments', isLoggedIn, (req, res) => {
 })
 
 // Delete a comment
-app.delete('/comments/:id', isLoggedIn, (req, res) => {
+router.delete('/comments/:id', isLoggedIn, (req, res) => {
   if (!req.user) return res.sendStatus(401);
 
   // check if user matches author
@@ -190,7 +190,7 @@ app.delete('/comments/:id', isLoggedIn, (req, res) => {
 })
 
 // Fetch a single user's ratings
-app.get('/rate/', isLoggedIn, (req, res) => {
+router.get('/rate/', isLoggedIn, (req, res) => {
   if (!req.user) return res.sendStatus(401);
   console.log(req.user.user_id);
   const data = db.prepare('SELECT comment_id, button FROM ratings WHERE user_id = ?').all(req.user.user_id);
@@ -200,7 +200,7 @@ app.get('/rate/', isLoggedIn, (req, res) => {
 
 
 // Rate comment
-app.put('/rate/:id', isLoggedIn, (req, res) => {
+router.put('/rate/:id', isLoggedIn, (req, res) => {
   if (!req.user) return res.sendStatus(401);
 
   // Check if user has already rated this comment
@@ -236,7 +236,7 @@ app.put('/rate/:id', isLoggedIn, (req, res) => {
 })
 
 // Edit a comment
-app.put('/comments/:id', isLoggedIn, (req, res) => {
+router.put('/comments/:id', isLoggedIn, (req, res) => {
   if (!req.user) return res.sendStatus(401);
 
   // check if user matches author
@@ -251,6 +251,7 @@ app.put('/comments/:id', isLoggedIn, (req, res) => {
   res.sendStatus(200);
 })
 
+app.use('/api', router)
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on http://${process.env.URL}:${process.env.PORT}`);
