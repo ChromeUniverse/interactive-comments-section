@@ -44,3 +44,18 @@
 ### Authentication/Authorization
 
 - [x] ~~Set up Google Identity Services~~
+
+
+## Edge cases and Fixes 🏗
+
+- [ ] Soft delete messages
+  - [ ] Show placeholder
+  - [ ] Still display replies
+  - [ ] Preserve data
+
+## Extra-stretch Goals 💪
+
+- [ ] Markdown editing!
+  - [ ] Store as plaintext in DB
+  - [ ] Input sanitization
+  - [ ] Custom styling for italics, bold, headers, links, images, etc.
