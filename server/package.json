@@ -4,12 +4,14 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "run": "pm2 start server.js"
   },
   "keywords": [],
   "author": "Lucca Rodrigues",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.1.2",
     "better-sqlite3": "^7.6.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
