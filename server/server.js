@@ -1,5 +1,8 @@
 // packages
 const express = require("express");
+const path = require('path');
+const fs = require('fs');
+const axios = require('axios')
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -22,6 +25,23 @@ async function asyncJWTverify(payload, secret) {
       resolve(decoded);
     });
   })  
+}
+
+async function downloadPFP(userId, imageURL) {
+  const pathToImage = path.resolve(__dirname, 'avatars', `${userId}.jpg`)
+  const writer = fs.createWriteStream(pathToImage)
+
+  const response = await axios({
+    url: imageURL,
+    method: 'GET',
+    responseType: 'stream'
+  })
+
+  return new Promise((resolve, reject) => {
+    response.data.pipe(writer)
+    writer.on('finish', resolve)
+    writer.on('error', reject)
+  })
 }
 
 function getScoreForComment(id) {
@@ -55,6 +75,8 @@ async function isLoggedIn(req, res, next) {
 const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+app.use('/avatars', express.static(path.join(__dirname, 'avatars')))
+
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -86,7 +108,6 @@ app.post('/login', async (req, res) => {
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(req.body.email);
 
   let userObject = {
-    user_id: user.id,
     email: req.body.email,
     username: req.body.name,
     pfp_url: req.body.picture
@@ -97,8 +118,11 @@ app.post('/login', async (req, res) => {
     console.log('User not found, creating account');
     const stmt = db.prepare("INSERT INTO users (email, username, pfp_url) VALUES(?, ?, ?)");
     const info = stmt.run(req.body.email, req.body.name, req.body.picture);
+    await downloadPFP(info.lastInsertRowid, req.body.picture);
     userObject.user_id = info.lastInsertRowid;
   } else {
+    userObject.user_id = user.id;
+    userObject.pfp_url = `${process.env.BACKEND_URL}/${user.id}`;
     console.log('User found!', user);
   }
 
@@ -168,8 +192,9 @@ app.delete('/comments/:id', isLoggedIn, (req, res) => {
 // Fetch a single user's ratings
 app.get('/rate/', isLoggedIn, (req, res) => {
   if (!req.user) return res.sendStatus(401);
-
+  console.log(req.user.user_id);
   const data = db.prepare('SELECT comment_id, button FROM ratings WHERE user_id = ?').all(req.user.user_id);
+  console.log(data);
   return res.json(data)
 })
 
