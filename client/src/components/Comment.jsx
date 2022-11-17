@@ -2,38 +2,50 @@ import React, { useState } from "react";
 import TextInput from "./TextInput";
 
 function timeSince(date) {
-
   var seconds = Math.floor((new Date() - date) / 1000);
 
   var interval = seconds / 31536000;
 
   if (interval > 1) {
-    return Math.floor(interval) + ` year${Math.floor(interval) === 1 ? '' : 's'} ago`;
+    return (
+      Math.floor(interval) + ` year${Math.floor(interval) === 1 ? "" : "s"} ago`
+    );
   }
   interval = seconds / 2592000;
   if (interval > 1) {
-    return Math.floor(interval) + ` months ago`;
+    return (
+      Math.floor(interval) +
+      ` month${Math.floor(interval) === 1 ? "" : "s"} ago`
+    );
   }
   interval = seconds / 86400;
   if (interval > 1) {
-    return Math.floor(interval) + ` day${Math.floor(interval) === 1 ? '' : 's'} ago`;
+    return (
+      Math.floor(interval) + ` day${Math.floor(interval) === 1 ? "" : "s"} ago`
+    );
   }
   interval = seconds / 3600;
   if (interval > 1) {
-    return Math.floor(interval) + ` hour${Math.floor(interval) === 1 ? '' : 's'} ago`;
+    return (
+      Math.floor(interval) + ` hour${Math.floor(interval) === 1 ? "" : "s"} ago`
+    );
   }
   interval = seconds / 60;
   if (interval > 1) {
-    return Math.floor(interval) + ` minute${Math.floor(interval) === 1 ? '' : 's'} ago`;
+    return (
+      Math.floor(interval) +
+      ` minute${Math.floor(interval) === 1 ? "" : "s"} ago`
+    );
   }
-  interval = seconds / 60 
+  interval = seconds / 60;
   if (interval > 10) {
-    return Math.floor(seconds) + ` second${Math.floor(interval) === 1 ? '' : 's'} ago`;
+    return (
+      Math.floor(seconds) +
+      ` second${Math.floor(interval) === 1 ? "" : "s"} ago`
+    );
   }
   return "just now";
-  
 }
-
 
 function Comment({
   comment,
@@ -88,7 +100,7 @@ function Comment({
   }
 
   function replyConfirmClickHandler() {
-    if (replyBuffer === '') return;
+    if (replyBuffer === "") return;
     setReplyMode(false);
     setReplyBuffer("");
     const originalId = reply ? parentId : comment.comment_id;
@@ -127,7 +139,9 @@ function Comment({
             onClick={plusClickHandler}
           >
             <path
-              className={`${user ? "hover:fill-moderateBlue cursor-pointer" : ''}`}
+              className={`${
+                user ? "hover:fill-moderateBlue cursor-pointer" : ""
+              }`}
               d="M6.33 10.896c.137 0 .255-.05.354-.149.1-.1.149-.217.149-.354V7.004h3.315c.136 0 .254-.05.354-.149.099-.1.148-.217.148-.354V5.272a.483.483 0 0 0-.148-.354.483.483 0 0 0-.354-.149H6.833V1.4a.483.483 0 0 0-.149-.354.483.483 0 0 0-.354-.149H4.915a.483.483 0 0 0-.354.149c-.1.1-.149.217-.149.354v3.37H1.08a.483.483 0 0 0-.354.15c-.1.099-.149.217-.149.353v1.23c0 .136.05.254.149.353.1.1.217.149.354.149h3.333v3.39c0 .136.05.254.15.353.098.1.216.149.353.149H6.33Z"
               fill={`${
                 comment.rating === 1 ? "hsl(238, 40%, 52%)" : "#C5C6EF"
@@ -145,7 +159,9 @@ function Comment({
             onClick={minusClickHandler}
           >
             <path
-              className={`${user ? "hover:fill-moderateBlue cursor-pointer" : ''}`}
+              className={`${
+                user ? "hover:fill-moderateBlue cursor-pointer" : ""
+              }`}
               d="M9.256 2.66c.204 0 .38-.056.53-.167.148-.11.222-.243.222-.396V.722c0-.152-.074-.284-.223-.395a.859.859 0 0 0-.53-.167H.76a.859.859 0 0 0-.53.167C.083.437.009.57.009.722v1.375c0 .153.074.285.223.396a.859.859 0 0 0 .53.167h8.495Z"
               fill={`${
                 comment.rating === -1 ? "hsl(238, 40%, 52%)" : "#C5C6EF"
@@ -161,7 +177,9 @@ function Comment({
             {/* PFP */}
             <img
               className="w-8 rounded-full"
-              src={`${import.meta.env.VITE_BACKEND_URL}/avatars/${comment.user_id}.jpg`}
+              src={`${import.meta.env.VITE_BACKEND_URL}/avatars/${
+                comment.user_id
+              }.jpg`}
               alt="user-pfp"
             />
 
@@ -176,7 +194,9 @@ function Comment({
             </div>
 
             {/* Date */}
-            <p className="font-normal text-grayishBlue">{timeSince(comment.created_at)}</p>
+            <p className="font-normal text-grayishBlue">
+              {timeSince(comment.created_at)}
+            </p>
 
             {/* Actions */}
             {user && (

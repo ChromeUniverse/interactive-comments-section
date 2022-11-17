@@ -207,7 +207,7 @@ router.get("/comments", async (req, res) => {
     const comment = {
       comment_id: data?.id,
       content: data?.content,
-      createdAt: data?.created_at,
+      created_at: data?.created_at,
       parent_id: data?.parent_id,
       replying_to: data.replying_to,
       username: data?.users.username,
