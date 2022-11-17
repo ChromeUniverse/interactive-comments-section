@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "outDir": "dist",
     "strict": true,
+    "outDir": "build",
     "lib": ["ESNext"],
     "esModuleInterop": true
   }
