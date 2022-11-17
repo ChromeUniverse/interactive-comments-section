@@ -6,9 +6,9 @@ import axios from "axios";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../.env") });
 import { PrismaClient } from "@prisma/client";
-import { UserJWT } from "./index";
+import { UserJWT } from "../index";
 
 const prisma = new PrismaClient();
 
@@ -101,8 +101,8 @@ const app = express();
 const router = express.Router();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
-app.use(express.static(process.env.PATH_TO_REACT_APP as string));
-app.use("/avatars", express.static(path.join(__dirname, "avatars")));
+app.use(express.static(path.join(__dirname, "../", "../", "client", "dist")));
+app.use("/avatars", express.static(path.join(__dirname, "../avatars")));
 
 router.get("/", (req, res) => {
   res.send("Hello World!");
